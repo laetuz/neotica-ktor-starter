@@ -4,8 +4,9 @@ import id.neotica.domain.model.ErrorResponse
 import id.neotica.domain.model.ForbiddenException
 import id.neotica.domain.model.NotFoundException
 import id.neotica.domain.model.ValidationException
+import id.neotica.route.HelloRoute
+import id.neotica.route.NotesRoute
 import id.neotica.route.PublicRoute
-import id.neotica.route.TaskRoute
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.statuspages.*
@@ -15,17 +16,17 @@ import org.koin.ktor.ext.get
 
 /**
  * Installs the unified error contract (typed exceptions → structured JSON) and
- * mounts every route group.
+ * mounts every route group. `/auth/login` is mounted only when auth is enabled.
  */
 object Routing {
 
     fun configure(app: Application) {
-        val publicRoute: PublicRoute = app.get()
-        val taskRoute: TaskRoute = app.get()
+        val helloRoute: HelloRoute = app.get()
+        val notesRoute: NotesRoute = app.get()
 
         app.install(StatusPages) {
             status(HttpStatusCode.NotFound) { call, _ ->
-                call.respond(ErrorResponse("not_found", "Resource not found"))
+                call.respond(HttpStatusCode.NotFound, ErrorResponse("not_found", "Resource not found"))
             }
             exception<ValidationException> { call, e ->
                 call.respond(HttpStatusCode.BadRequest, ErrorResponse("invalid_request", e.message ?: "Invalid request"))
@@ -44,8 +45,13 @@ object Routing {
         }
 
        app.routing {
-            publicRoute.mount(this)
-            taskRoute.mount(this)
+            helloRoute.mount(this)
+            notesRoute.mount(this)
+
+            if (AppConfig.authEnabled) {
+                val publicRoute: PublicRoute = app.get()
+                publicRoute.mount(this)
+            }
         }
     }
 }

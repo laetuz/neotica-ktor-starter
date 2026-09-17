@@ -1,5 +1,6 @@
 package id.neotica.application
 
+import id.neotica.AppConfig
 import id.neotica.domain.model.Role
 import id.neotica.domain.model.TokenPrincipal
 import id.neotica.service.TokenService
@@ -21,7 +22,9 @@ object Plugins {
     fun installAll(app: Application) {
         installSerialization(app)
         installCallLogging(app)
-        installAuthentication(app)
+        if (AppConfig.authEnabled) {
+            installAuthentication(app)
+        }
     }
 
     private fun installSerialization(app: Application) {

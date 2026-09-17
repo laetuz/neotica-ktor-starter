@@ -11,7 +11,7 @@ fun main(args: Array<String>): Unit =
 fun Application.module() {
     // Koin must be installed before any plugin depends on injected services.
     install(Koin) {
-        modules(appModule)
+        modules(appModule())
     }
 
     Plugins.installAll(this)
